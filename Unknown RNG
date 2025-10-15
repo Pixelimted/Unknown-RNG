@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unknown RNG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #0a0a0f, #1a0b2e, #16213e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(138, 43, 226, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-100px) translateX(50px); }
+            50% { transform: translateY(-200px) translateX(-50px); }
+            75% { transform: translateY(-100px) translateX(100px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+            transition: all 0.3s;
+        }
+
+        nav.scrolled {
+            padding: 15px 50px;
+            background: rgba(10, 10, 15, 0.95);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 80px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s;
+        }
+
+        .hero p {
+            font-size: 24px;
+            margin-bottom: 40px;
+            opacity: 0.8;
+            animation: fadeInUp 1s 0.2s backwards;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            animation: fadeInUp 1s 0.4s backwards;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(138, 43, 226, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-5px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 100px 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 48px;
+            margin-bottom: 50px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Codes Section */
+        .codes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .code-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .code-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(138, 43, 226, 0.6);
+            box-shadow: 0 20px 40px rgba(138, 43, 226, 0.3);
+        }
+
+        .code-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .code-text {
+            background: rgba(138, 43, 226, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Gameplay Section */
+        .gameplay-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .gameplay-text {
+            font-size: 18px;
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        .gameplay-text h3 {
+            color: #667eea;
+            font-size: 28px;
+            margin: 30px 0 15px 0;
+        }
+
+        .gameplay-video {
+            background: rgba(138, 43, 226, 0.1);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            opacity: 0.7;
+        }
+
+        /* Wiki Section */
+        .wiki-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .wiki-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .wiki-card:hover {
+            transform: scale(1.05);
+            border-color: rgba(138, 43, 226, 0.6);
+        }
+
+        .wiki-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .wiki-card h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        /* Discord Section */
+        .discord-box {
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.2) 0%, rgba(102, 126, 234, 0.2) 100%);
+            border: 2px solid rgba(88, 101, 242, 0.4);
+            border-radius: 30px;
+            padding: 60px;
+            text-align: center;
+        }
+
+        .discord-box h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+
+        .discord-box p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        /* Creators Section */
+        .creators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .creator-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .creator-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(138, 43, 226, 0.6);
+        }
+
+        .creator-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .creator-card h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .creator-card p {
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(10, 10, 15, 0.95);
+            padding: 50px;
+            text-align: center;
+            border-top: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        footer p {
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .social-links a {
+            color: #667eea;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2);
+            color: #764ba2;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                gap: 15px;
+                font-size: 14px;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .gameplay-content {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 60px 20px;
+            }
+
+            .section-title {
+                font-size: 36px;
+            }
+        }
+
+        /* Scroll Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="particles" id="particles"></div>
+
+    <nav id="navbar">
+        <div class="logo">⚡ UNKNOWN RNG</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#codes">Codes</a></li>
+            <li><a href="#gameplay">Gameplay</a></li>
+            <li><a href="#wiki">Wiki</a></li>
+            <li><a href="#discord">Discord</a></li>
+            <li><a href="#creators">Creators</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero" id="home">
+        <h1>UNKNOWN RNG</h1>
+        <p>Uncover the "Hidden Truths". Roll for auras. Become legendary.</p>
+        <div class="cta-buttons">
+            <a href="https://www.roblox.com/games/14491806715/Unknown-RNG-SMALL-UPD" target="_blank" class="btn btn-primary">Play Now</a>
+            <a href="#codes" class="btn btn-secondary">Get Codes</a>
+        </div>
+    </section>
+
+    <section id="codes" class="reveal">
+        <h2 class="section-title">Active Codes</h2>
+        <div class="codes-grid">
+            <div class="code-card">
+                <h3>🎉 REWORK</h3>
+                <p>Code for the release of the Reworked game</p>
+                <div class="code-text">REWORK</div>
+                <button class="copy-btn" onclick="copyCode('REWORK')">Copy Code</button>
+            </div>
+            <div class="code-card">
+                <h3>⚡ Reactors!</h3>
+                <p>Thank you for reacting</p>
+                <div class="code-text">100Reactions</div>
+                <button class="copy-btn" onclick="copyCode('100Reactions')">Copy Code</button>
+            </div>
+            <div class="code-card">
+                <h3>🌟 Streamer Code</h3>
+                <p>xxyumekoxx15's special code</p>
+                <div class="code-text">Dreamers</div>
+                <button class="copy-btn" onclick="copyCode('Dreamers')">Copy Code</button>
+            </div>
+            <div class="code-card">
+                <h3>💎 25,000 Visits!</h3>
+                <p>Special code for 25k visits</p>
+                <div class="code-text">25kvisits</div>
+                <button class="copy-btn" onclick="copyCode('25kvisits')">Copy Code</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="gameplay" class="reveal">
+        <h2 class="section-title">How to Play</h2>
+        <div class="gameplay-content">
+            <div class="gameplay-text">
+                <p>Welcome to Unknown RNG, where every roll could change your mood! Embark on an exciting journey filled with mystery, luck, and incredible fun.</p>
+                
+                <h3>🎲 Rolling System</h3>
+                <p>Click to roll and discover rare auras with unique effects. Each roll brings you closer to legendary items that others can only dream of.</p>
+                
+                <h3>⚡ Luck Mechanics</h3>
+                <p>Increase your luck multiplier through gameplay, codes, and special events. Higher luck means better chances at obtaining higher rarity auras.</p>
+                
+                <h3>🏆 Compete & Trade</h3>
+                <p>Show off your rare collections, trade with other players, and climb the leaderboards to become the ultimate RNG master.</p>
+            </div>
+            <div class="gameplay-video">
+                <p>🎮 Gameplay Preview Coming Soon</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="wiki" class="reveal">
+        <h2 class="section-title">Game Wiki</h2>
+        <div class="wiki-grid">
+            <div class="wiki-card">
+                <div class="wiki-icon">🎲</div>
+                <h3>Auras Guide</h3>
+                <p>Complete list of all auras and their rarities</p>
+            </div>
+            <div class="wiki-card">
+                <div class="wiki-icon">⚡</div>
+                <h3>Luck System</h3>
+                <p>Learn how to maximize your luck</p>
+            </div>
+            <div class="wiki-card">
+                <div class="wiki-icon">🏆</div>
+                <h3>Achievements</h3>
+                <p>Track your progress and unlock rewards</p>
+            </div>
+            <div class="wiki-card">
+                <div class="wiki-icon">💫</div>
+                <h3>Special Events</h3>
+                <p>Limited time events and exclusive items</p>
+            </div>
+            <div class="wiki-card">
+                <div class="wiki-icon">🔄</div>
+                <h3>Trading Guide</h3>
+                <p>Tips and values for successful trades</p>
+            </div>
+            <div class="wiki-card">
+                <div class="wiki-icon">📊</div>
+                <h3>Statistics</h3>
+                <p>Probability rates and drop chances</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="discord" class="reveal">
+        <div class="discord-box">
+            <h2>Join Our Community! 💬</h2>
+            <p>Connect with hundreds of players, get the latest updates, participate in events, and trade with the community.</p>
+            <a href="https://discord.gg/2pn6VT4vg2" class="btn btn-primary">Join Discord Server</a>
+        </div>
+    </section>
+
+    <section id="creators" class="reveal">
+        <h2 class="section-title">Content Creators</h2>
+        <div class="creators-grid">
+            <div class="creator-card">
+                <div class="creator-avatar">🎬</div>
+                <h3>Solaris</h3>
+                <p>YouTube • 50.8K Subscribers</p>
+                <a href="https://www.youtube.com/@sola_ris" class="btn btn-secondary">Watch Videos</a>
+            </div>
+            <div class="creator-card">
+                <div class="creator-avatar">📺</div>
+                <h3>xxyumekoxx15</h3>
+                <p>Twitch • Live Streams</p>
+                <a href="https://www.twitch.tv/xxyumekoxx15" class="btn btn-secondary">Follow Stream</a>
+            </div>
+            <div class="creator-card">
+                <div class="creator-avatar">🎮</div>
+                <h3>Kiloprost</h3>
+                <p>Youtube • Code Explainer</p>
+                <a href="https://www.youtube.com/@kiloprost" class="btn btn-secondary">View Profile</a>
+            </div>
+            <div class="creator-card">
+                <div class="creator-avatar">⭐</div>
+                <h3>Apply</h3>
+                <p>Apply to become a partner</p>
+                <a href="https://dyno.gg/form/b5c0dac4" class="btn btn-secondary">Apply Now</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 Unknown RNG. Not affiliated with Roblox Corporation.</p>
+        <div class="social-links">
+            <a href="https://www.roblox.com/communities/32955970/Unknown-Studios#!/about">📱</a>
+            <a href="https://www.roblox.com/games/14491806715/Unknown-RNG-SMALL-UPD">🎮</a>
+            <a href="https://discord.gg/2pn6VT4vg2">💬</a>
+            <a href="https://www.youtube.com/@UnknownRNGOfficial">🎬</a>
+        </div>
+    </footer>
+
+    <script>
+        // Particle Animation
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 5 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDuration = Math.random() * 20 + 10 + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Scroll reveal animation
+        function reveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            for (let i = 0; i < reveals.length; i++) {
+                const windowHeight = window.innerHeight;
+                const elementTop = reveals[i].getBoundingClientRect().top;
+                const elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add('active');
+                }
+            }
+        }
+
+        window.addEventListener('scroll', reveal);
+        reveal();
+
+        // Copy code function
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                // Create notification
+                const notification = document.createElement('div');
+                notification.textContent = 'Code copied! ✓';
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 15px 30px;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            });
+        }
+
+        // Add animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
